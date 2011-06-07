@@ -1,0 +1,20 @@
+@CHARSET "UTF-8";
+
+body {
+	background-color: #000;
+	color: #fff;
+}
+
+#wrapper {
+	position: absolute;
+  width: 1024;	
+}
+
+#game {
+	position: relative;
+	background-color: #0012ff;
+	width: 800px;
+	height: 600px;
+	top: 100px;
+	left: 30%;
+}

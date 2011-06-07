@@ -1,4 +1,4 @@
-(function() {
+(function (window) {
   var Canvas = Base.extend({
     constructor: function(id, width, height, message) {
 	  this.elem = document.createElement('canvas');
@@ -17,14 +17,13 @@
 	}
   });
 
+  // This class is just a wrapper for a function. It is not funny at all.
   var Fun = Base.extend({
     constructor: function(name, f) {
 	  this.name = name;
 	  this.f = f;
 	},
-	run: function() {
-	  this.f();
-	}
+	run: this.f, 	
   });
 
   var Vm = Base.extend({
@@ -57,27 +56,24 @@
 	   }) ();
 	}
    });
-
-   var Shark = Base.extend({
-     constructor: function(id, width, height, message, undefined) {
-	   this.screen = new Canvas(id, width, height, message);
-     }
+  
+  // An Asset is kind of an abstract class so we
+  // let it out of the Assets types provided by sharkAssets.
+  var Asset = Base.extend({
+    constructor : function(id, source) {
+	   this.id = id;
+	   this.source = source;
+	 }
    });
    
-   var Base = {
-     Shark: Shark,
-    };
-		    
-    // if Shark is not defined, we do it.
-	if (window.Shark === undefined) {
-	  window.Shark = {};   
-	}
+   var Core = {
+	 Name: "Shark",
+     App: Vm,
+   };
 		  
     // And for my next trick... I'll move these classes to the global context.
-	window.shark.Base = Base;
+	window.Shark.Core = Core;
 }) (window);
-
-
 
 
 

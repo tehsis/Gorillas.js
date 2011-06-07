@@ -1,20 +1,13 @@
 // An Asset is any resource which could be idetified by and id
 // and which has a source to look for it.// and which has a source to look for it.
 
-(function() {
+function shark_assets() {
    // An Asset is kind of an abstract class so we
    // let it out of the Assets types provided by sharkAssets.
-   var Asset = Base.extend({
-     constructor : function(id, source) {
-	   this.id = id;
-	   this.source = source;
-	 }
-    });
-
     var Image = Asset.extend({
 	  constructor : function(id, source, width, height) {
 	    this.base(id, source);
-        this.img = new Image();
+        this.img = new window.Image();
 		this.width = width;
 		this.height = height;
 		this.img.src = this.source;
@@ -43,15 +36,10 @@
 	  });
     
    var Assets = {
+	 Name : "Assets",
      Image: Image,
      Sprite: Sprite,
    };
     
-   // if Shark is not defined, we do it.
-   if (window.Shark === undefined) {
-     window.Shark = {};   
-   }
-  
-   // And for my next trick... I'll move these classes to the global context.
-   window.shark.Assets = Assets;  
-}) (window);
+  return Assets;
+};
