@@ -1,10 +1,10 @@
 // An Asset is any resource which could be idetified by and id
 // and which has a source to look for it.// and which has a source to look for it.
 
-function shark_assets() {
+(function (window) {
    // An Asset is kind of an abstract class so we
    // let it out of the Assets types provided by sharkAssets.
-    var Image = Asset.extend({
+    var Image = Shark.Core.Entity.extend({
 	  constructor : function(id, source, width, height) {
 	    this.base(id, source);
         this.img = new window.Image();
@@ -22,7 +22,8 @@ function shark_assets() {
     });
 	
     var Sprite = Image.extend({
-	  constructor : function(id, source, imgWidth, imgHeight, cursorWidth, cursorHeight) {
+	  constructor : function(id, source, imgWidth, imgHeight, cursorWidth, 
+			  cursorHeight) {
 	    this.base(id, source, imgWidth, imgHeight);
 		this.cursorWidth = cursorWidth;
 		this.cursorHeight = cursorHeight;
@@ -30,16 +31,42 @@ function shark_assets() {
 		this.position = 0;
       },
 	  draw : function(context, x, y) {
-	    context.drawImage(this.img, position * cursorWidth, 0, cursorWidth, cursorHeight, x, y, cursorWidth, cursorHeight);
+	    context.drawImage(this.img, position * cursorWidth, 0, cursorWidth, 
+	    		cursorHeight, x, y, cursorWidth, cursorHeight);
 		  position = (position < cantImages) ? position + 1 : 0;
 		}
 	  });
+    
+    // An DSprite (Dynamic Sprite) is an sprite
+    // drawed using functions from a JS Canvas context.
+    // This is not an image so it doesn't extend
+    // from it.
+    var DSprite = Shark.Core.Entity.extend({
+       constructor: function(x, y, baseF) {
+         this.base(x, y);
+         this.drawingFunctions = [];
+         this.drawingFunctions.push(baseF);
+         this.frame = 0;
+       },
+       
+       draw: function() {
+         this.drawingFunctions[this.frame](this.canvas.context(), this.position.x, this.position.y);
+         this.frame = (this.drawingFunctions.length-1 < this.frame)?
+        		 this.frame + 1:0;
+       },
+       // Each drawing function must have a context and a position 
+       addFunction: function(f) {
+         this.drawingFunctions.push(f);   
+       },
+       
+    });
     
    var Assets = {
 	 Name : "Assets",
      Image: Image,
      Sprite: Sprite,
+     DSprite: DSprite,
    };
     
-  return Assets;
-};
+   Shark.Assets = Assets;
+}) (window);
