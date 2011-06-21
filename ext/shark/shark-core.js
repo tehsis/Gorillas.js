@@ -28,20 +28,14 @@
 	}
   });
 
-  // This class is just a wrapper for a function. It is not funny at all.
-  var Fun = Base.extend({
-    constructor: function(name, f) {
-	  this.name = name;
-	  this.f = f;
-	},
-	run: this.f, 	
-  });
-
   var Vm = Base.extend({
     constructor: function(parent, width, height, clock) {
       this.entities = [];
-      this.loop = [];
+      this.loop;
       this.init = [];
+      this.phases = {};
+      this.actualPhase;
+      this.variables = {};
       this.clock = clock;
       this.ticks = 0;
       this.mainCanvas = new Canvas('shark-main', width, height, parent); 
@@ -53,30 +47,52 @@
         };
       };
     },
+    addPhase: function(name, f, isDefault) {
+      // Each function phase must return the next phase
+      // to be executed.
+      // TODO: provide a way to handle undefined phases.
+      this.phases[name] = f;
+      if (isDefault) {
+        this.actualPhase = name;	  
+      };
+    },
+    phase: function() {
+      var executingPhase = this.phases[this.actualPhase];
+      var next = executingPhase();
+      this.actualPhase = next;	  
+    },
+    set: function(name, value) {
+      this.variables[name] = value;	
+    },
+    get: function(name, defaultValue) {
+      value = this.variables[name] || defaultValue;
+      return value;
+    },
+    del: function(name) { 
+      this.variables[name] = undefined;	
+    },
     onLoop: function(f) {
-      this.loop.push(f);	
+      this.loop = f;	
     },
     onInit: function(f) {
-      this.init.push(f);
+      this.init = f;
     },
-    addEntity: function (entity) {
+    addEntity: function (name, entity) {
     	entity.onAttach(this.mainCanvas);
-    	this.entities.push(entity);
+    	this.entities[name] = entity;
+    },
+    entity: function(name) {
+      return this.entities[name]; 	
     },
     getTicks: function() {
       return this.ticks;	
     },
     start: function() {
-      var i;
-      for (i=0; i<this.init.length; i++) {
-        this.init[i]();	  
-      }
+      this.init();	  
       that = this;
       function looping() { 
         that.clearScreen();
-        for (i=0; i<that.loop.length; i++) {
-          that.loop[i]();	  
-        }; 
+        that.loop();
         that.ticks++;
         return that.clock;
       };
@@ -113,6 +129,9 @@
 	    backCanvas.element().height,
 	    backCanvas.parent
 	  ); 
+	},
+	context: function() {
+	  return this.canvas.context();	
 	},
 	clear: function() {
 	  this.canvas.clear();

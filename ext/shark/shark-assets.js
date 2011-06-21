@@ -49,8 +49,12 @@
          this.frame = 0;
        },
        
-       draw: function() {
-         this.drawingFunctions[this.frame](this.canvas.context(), this.position.x, this.position.y);
+       draw: function(time) {
+    	 var context = this.canvas.context();
+    	 context.save();
+    	 context.translate(this.position.x, this.position.y); 
+         this.drawingFunctions[this.frame](context, time);
+         context.restore();
          this.frame = (this.drawingFunctions.length-1 < this.frame)?
         		 this.frame + 1:0;
        },
