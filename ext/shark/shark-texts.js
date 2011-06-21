@@ -8,7 +8,7 @@
       this.text = text;
       
     },
-    text: function(ntext) {
+    setText: function(ntext) {
       this.text = ntext || this.text;
       return this.text;
     },

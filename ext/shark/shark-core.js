@@ -30,7 +30,7 @@
 
   var Vm = Base.extend({
     constructor: function(parent, width, height, clock) {
-      this.entities = [];
+      this.entities = {};
       this.loop;
       this.init = [];
       this.phases = {};
@@ -42,8 +42,8 @@
       this.clearScreen = function() {
         var i;
         this.mainCanvas.clear();
-        for (i=0; i<this.entities.length; i++) {
-          this.entities[i].clear();	
+        for (entity in this.entities) {
+         this.entities[entity].clear();	
         };
       };
     },
@@ -66,6 +66,7 @@
     },
     get: function(name, defaultValue) {
       value = this.variables[name] || defaultValue;
+      this.variables[name] = value;
       return value;
     },
     del: function(name) { 
