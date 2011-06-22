@@ -1597,20 +1597,22 @@ var gorillas = function (window) {
            };
            
            var Banana = Shark.Assets.DSprite.extend({
-             throwing: function(velocity, angle, startTime, actualTime, gravity) {
-            	 var g = gravity;
-            	 var t = actualTime - startTime;
-            	 var v = velocity;
-            	 var y;
-            	 var a = (angle)*(3.14/180);
-            	 var vx = v * Math.cos(a);
-            	 var v0y = v * Math.sin(a);
-            	 y = this.position.y - (v0y*t - ((g*t*t)/2));
-            	 var x = this.position.x + (vx * t) + 20;
-            	 this.position.x = x;
-            	 this.position.y = y;
-            	 outOfScreen = (x >= width) || (y > height);
-            	 return outOfScreen;	 
+             throwing: function(gorilla, to, velocity, angle, startTime, actualTime, gravity) {
+               var g = gravity;
+	       var t = actualTime - startTime;
+               var v = velocity;
+               var a = (angle)*(3.14/180);
+               var vx = v * Math.cos(a);
+               var v0y = v * Math.sin(a);
+               var hmax = ((v0y*v0y) / (2*g));
+               this.position.y = gorilla.position.y - (v0y*t - ((g*t*t)/2));
+               if (to === 'right') {
+                 this.position.x = gorilla.position.x - (vx * t) -  20;
+               } else {
+                 this.position.x = gorilla.position.x + (vx * t) +   20;
+               }
+               outOfScreen = (this.position.x >= width) || (this.position.y > height);
+               return outOfScreen;	 
              },   
            });
            
@@ -1627,7 +1629,7 @@ var gorillas = function (window) {
             	 var nFBuilding = fBuilding(bwidth, bheight);
             	 var nBuilding = new Shark.Assets.DSprite(x, y, nFBuilding);
                  this.building.push(nBuilding);
-          		 Vm.addEntity('building' + i, nBuilding);      
+                 Vm.addEntity('building' + i, nBuilding);      
                };
              },
              position: function(n) {
@@ -1709,17 +1711,28 @@ var gorillas = function (window) {
              }
              
              function onThrowing() {
-               var startTime = Vm.get('startTime', Vm.getTicks()) / 10;
-           	   var actualTime = Vm.getTicks() / 10;
-           	   var gravity = 9.8;
+               var startTime = Vm.get('startTime', Vm.getTicks());
+               var actualTime = Vm.getTicks();
+               var gravity = 9.8;
+               var turn = Vm.get('turn');
+               var gorilla = Vm.entity("gorilla" + turn);
+               var to;
+               if (turn === 1) {
+                 to = 'left';
+               } else { 
+                 to = 'right';
+               } 
                var next = 'throwing';
                var velocity = parseInt(Vm.get('vel'));
                var angle = parseInt(Vm.get('angle'));
-         	   var banana = Vm.entity('banana');
-         	   if (banana.throwing(velocity, angle, startTime, actualTime, gravity)) {
-         		 next = 'changeTurn';  
-         	   };
-         	   banana.draw(Vm.getTicks()*10);
+               var banana = Vm.entity('banana');
+               if (banana.throwing(gorilla, to, velocity, angle, startTime, actualTime, gravity)) {
+                 next = 'changeTurn';  
+                 Vm.del('startTime');
+                 Vm.del('vel');
+                 Vm.del('angle');
+               };
+               banana.draw(Vm.getTicks()*10);
                return next;
              };
            
