@@ -16,8 +16,12 @@
       this.text += ntext;
       return this.text;
     },
-    draw: function() {
-      this.canvas.context().strokeText(this.text, this.position.x, this.position.y);
+    draw: function(update) {
+      this.update = update || this.update;
+      if (this.update) { 
+      this.canvas.clear();
+        this.canvas.context().strokeText(this.text, this.position.x, this.position.y);
+     }
     }
   });
   

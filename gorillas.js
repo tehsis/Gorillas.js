@@ -1663,7 +1663,7 @@ var gorillas = function (window) {
         	   Vm.set('angle', angle + evt.value);
         	   Vm.set('cantNumbers', cantNumbers+1);	
              };
-          	 angleText.draw();
+          	 angleText.draw(true);
           	 
           	 return next;
            };
@@ -1681,7 +1681,7 @@ var gorillas = function (window) {
                };
                
                angleText.draw();
-               velText.draw();
+               velText.draw(true);
                if (evt && evt.type == 'numericKey') {
                  velText.append(evt.value);
                  Vm.set('vel', vel + evt.value);
@@ -1711,8 +1711,8 @@ var gorillas = function (window) {
              }
              
              function onThrowing() {
-               var startTime = Vm.get('startTime', Vm.getTicks());
-               var actualTime = Vm.getTicks();
+               var startTime = Vm.get('startTime', Vm.getTicks()) / 10;
+               var actualTime = Vm.getTicks() / 10;
                var gravity = 9.8;
                var turn = Vm.get('turn');
                var gorilla = Vm.entity("gorilla" + turn);
@@ -1732,7 +1732,7 @@ var gorillas = function (window) {
                  Vm.del('vel');
                  Vm.del('angle');
                };
-               banana.draw(Vm.getTicks()*10);
+               banana.draw(true, Vm.getTicks()*10);
                return next;
              };
            

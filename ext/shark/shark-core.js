@@ -92,7 +92,6 @@
       this.init();	  
       that = this;
       function looping() { 
-        that.clearScreen();
         that.loop();
         that.ticks++;
         return that.clock;
@@ -109,8 +108,9 @@
     constructor : function(x, y) {
       this.position = {};
       this.position.x = x;
-      this.position.y = y;
-	},
+      this.position.y = y; 
+      this.update = true;
+    },
     x: function(x) {
       this.position.x = x || this.position.x;
       return this.position.x;

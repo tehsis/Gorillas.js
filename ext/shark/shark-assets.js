@@ -49,20 +49,24 @@
          this.frame = 0;
        },
        
-       draw: function(time) {
-    	 var context = this.canvas.context();
-    	 context.save();
-    	 context.translate(this.position.x, this.position.y); 
-         this.drawingFunctions[this.frame](context, time);
-         context.restore();
-         this.frame = (this.drawingFunctions.length-1 < this.frame)?
+       draw: function(update, time) {
+         this.update = update || this.update;
+         if(this.update) { 
+           this.canvas.clear();
+    	   var context = this.canvas.context();
+    	   context.save();
+    	   context.translate(this.position.x, this.position.y); 
+           this.drawingFunctions[this.frame](context, time);
+           context.restore();
+           this.frame = (this.drawingFunctions.length-1 < this.frame)?
         		 this.frame + 1:0;
-       },
-       // Each drawing function must have a context and a position 
-       addFunction: function(f) {
-         this.drawingFunctions.push(f);   
-       },
-       
+           this.update = false;
+         };
+         },
+           // Each drawing function must have a context and a position 
+           addFunction: function(f) {
+             this.drawingFunctions.push(f);   
+           },
     });
     
    var Assets = {
