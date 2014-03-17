@@ -10,8 +10,7 @@
 	  this.elem.style.position = "absolute";
 	  this.ctx = this.elem.getContext('2d');
 	  this.parent = parent;
-	  parentElm = document.getElementById(parent);
-	  parentElm.appendChild(this.elem);
+	  document.getElementById(parent).appendChild(this.elem);
 	  return this.elem;
 	},
 	parent: function() {
@@ -28,13 +27,11 @@
 	}
   });
 
-  var Vm = Base.extend({
+  var Vm = window.Base.extend({
     constructor: function(parent, width, height, clock) {
       this.entities = {};
-      this.loop;
       this.init = [];
       this.phases = {};
-      this.actualPhase;
       this.variables = {};
       this.clock = clock;
       this.ticks = 0;
@@ -42,9 +39,9 @@
       this.clearScreen = function() {
         var i;
         this.mainCanvas.clear();
-        for (entity in this.entities) {
+        for (var entity in this.entities) {
          this.entities[entity].clear();	
-        };
+        }
       };
     },
     addPhase: function(name, f, isDefault) {
@@ -94,12 +91,9 @@
       function looping() { 
         that.loop();
         that.ticks++;
-        return that.clock;
+    	  requestAnimationFrame(looping);
       };
-      (function() {
-    	  var clock = looping();
-    	  setTimeout(arguments.callee, clock);
-      }) ();
+    	requestAnimationFrame(looping);
    },
   });
   

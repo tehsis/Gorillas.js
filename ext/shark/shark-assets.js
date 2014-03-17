@@ -24,7 +24,7 @@
     var Sprite = Image.extend({
 	  constructor : function(id, source, imgWidth, imgHeight, cursorWidth, 
 			  cursorHeight) {
-	    this.base(id, source, imgWidth, imgHeight);
+	  this.base(id, source, imgWidth, imgHeight);
 		this.cursorWidth = cursorWidth;
 		this.cursorHeight = cursorHeight;
 		this.numberOfImages = (this.cursorWidth / this.width);

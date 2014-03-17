@@ -1,18 +1,12 @@
 var gorillas = function (window) {
-	window.Shark.Init([ 
-	  'ext/shark/shark-core.js',
-	  'ext/shark/shark-assets.js',
-          'ext/shark/shark-events.js',
-	  'ext/shark/shark-texts.js',
-     ], function() { 
 		   var width = 800;
 		   var height = 600;
 		   var Shark = window.Shark;
 		   var Vm = new Shark.Core.App('game', width, height, 1);
            fBanana = function(context, time) {
-        	   // Generated with Tilegen.
-        	  context.rotate(time*30 * Math.PI / 180);
- 			  context.fillStyle = "#fcfe04";
+        // Generated with Tilegen.
+        context.rotate(time*30 * Math.PI / 180);
+        context.fillStyle = "#fcfe04";
 			  context.fillRect(0, 0, 1, 1);
 			  context.fillRect(1, 0, 1, 1);
 			  context.fillRect(2, 0, 1, 1);
@@ -1654,7 +1648,7 @@ var gorillas = function (window) {
           	 var cantNumbers = Vm.get('cantNumbers', 0);
           	 var angle = Vm.get('angle', '');
           	 var next = 'waitingAngle';
-        	 if (cantNumbers === 2) {
+        	 if (cantNumbers >=  2) {
         	   next = 'waitingVel';
         	   Vm.del('cantNumbers');
         	 }; 
@@ -1781,7 +1775,4 @@ var gorillas = function (window) {
            });
            
            Vm.start();
-		   
-	    }
-	);
 };
