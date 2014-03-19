@@ -10,7 +10,10 @@
       this.elem.style.position = "absolute";
       this.ctx = this.elem.getContext('2d');
       this.parent = parent;
-      document.getElementById(parent).appendChild(this.elem);
+      this.parentElement = document.getElementById(parent); //.appendChild(this.elem);
+      this.bufferCanvas = this.elem.cloneNode();
+      this.parentElement.appendChild(this.elem);
+      this.bufferCtx = this.bufferCanvas.getContext('2d');
       return this.elem;
     },
     parent: function() {
@@ -24,6 +27,7 @@
     },
     clear: function() {
       this.ctx.clearRect(0, 0, this.elem.width, this.elem.height);
+      this.bufferCtx.clearRect(0, 0, this.elem.width, this.elem.height);
     }
   });
 
@@ -35,7 +39,12 @@
       this.variables = {};
       this.clock = clock;
       this.ticks = 0;
-      this.mainCanvas = new Canvas('shark-main', width, height, parent); 
+      this.mainCanvas = {
+        className: 'shark-main', 
+        width: width, 
+        height: height, 
+        parent: parent
+      }; 
       this.clearScreen = function() {
         var i;
         this.mainCanvas.clear();
@@ -120,8 +129,8 @@
     onAttach: function(backCanvas) {
       this.canvas = new Canvas(
         'entity',
-        backCanvas.element().width,
-        backCanvas.element().height,
+        backCanvas.width,
+        backCanvas.height,
         backCanvas.parent
       ); 
     },
