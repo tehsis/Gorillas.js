@@ -1,4 +1,4 @@
-var gorillas = function (window) {
+(function (window) {
   var width = 800;
   var height = 600;
   var Shark = window.Shark;
@@ -197,4 +197,4 @@ var gorillas = function (window) {
   });
 
   Vm.start();
-};
+})(window);
