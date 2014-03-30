@@ -42,13 +42,18 @@
     // This is not an image so it doesn't extend
     // from it.
     var DSprite = Shark.Core.Entity.extend({
-       constructor: function(x, y, baseF) {
+       constructor: function(x, y, width, height, baseF) {
          this.base(x, y);
+         this.width = width;
+         this.height = height;
          this.drawingFunctions = [];
          this.drawingFunctions.push(baseF);
          this.frame = 0;
        },
-       
+      hasCollisionedWith: function(entity) {
+        return ((this.x() + this.width >= entity.x()) && (this.x() <= entity.x() + entity.width)) &&
+             ((this.y() + this.height >= entity.y()) && (this.y() <= entity.y() + entity.height));
+      },     
        draw: function(update, time) {
          this.update = update || this.update;
          if(this.update) { 

@@ -45,13 +45,13 @@
         height: height, 
         parent: parent
       }; 
-      this.clearScreen = function() {
-        var i;
-        this.mainCanvas.clear();
-        for (var entity in this.entities) {
-          this.entities[entity].clear();	
-        }
-      };
+
+    },
+    clearScreen:  function() {
+      var i;
+      for (var entity in this.entities) {
+        this.entities[entity].clear();	
+      }
     },
     addPhase: function(name, f, isDefault) {
       // Each function phase must return the next phase
@@ -61,6 +61,10 @@
       if (isDefault) {
         this.actualPhase = name;	  
       };
+    },
+    reset: function() {
+      this.clearScreen();
+      this.variables = {};
     },
     phase: function() {
       var executingPhase = this.phases[this.actualPhase];
@@ -134,7 +138,8 @@
         backCanvas.parent
       ); 
     },
-    context: function() {
+    
+    contex: function() {
       return this.canvas.context();	
     },
     clear: function() {

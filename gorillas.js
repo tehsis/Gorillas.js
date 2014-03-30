@@ -41,7 +41,7 @@
         var x = (i*bwidth);
         var y = (700-bheight);
         var nFBuilding = fBuilding(bwidth, bheight);
-        var nBuilding = new Shark.Assets.DSprite(x, y, nFBuilding);
+        var nBuilding = new Shark.Assets.DSprite(x, y, 20, 20, nFBuilding);
         this.building.push(nBuilding);
         Vm.addEntity('building' + i, nBuilding);      
       }
@@ -91,7 +91,7 @@
     var next = 'waitingVel';
     if (cantNumbers === 2) {
       Vm.del('cantNumbers');
-      next = 'throwing';
+      next ='throwing';
     }
 
     angleText.draw();
@@ -131,6 +131,7 @@
     var gravity = 9.8;
     var turn = Vm.get('turn');
     var gorilla = Vm.entity("gorilla" + turn);
+    var opponent = (gorilla === Vm.entity("gorilla1"))?Vm.entity("gorilla2"):Vm.entity("gorilla1");
     var to;
     if (turn === 1) {
       to = 'left';
@@ -141,6 +142,13 @@
     var velocity = parseInt(Vm.get('vel'), 10);
     var angle = parseInt(Vm.get('angle'), 10);
     var banana = Vm.entity('banana');
+
+    if (banana.hasCollisionedWith(opponent)) {
+      Vm.set('winner', gorilla);
+      Vm.set('looser', opponent);
+      next =  "onWin";
+    }
+
     if (banana.throwing(gorilla, to, velocity, angle, startTime, actualTime, gravity)) {
       next = 'changeTurn';  
       Vm.del('startTime');
@@ -151,7 +159,18 @@
     return next;
   }
 
-  Vm.onInit(function() {
+  function onWin() {
+    var looserGorilla = Vm.get('looser');
+    var banana = Vm.entity('banana');
+
+    looserGorilla.clear();
+    banana.clear();
+
+    return 'onInit';
+  }
+
+  function initGame(){ 
+    Vm.reset();
     // Creating buildings
     var buildings = new Buildings(10);
     // Creating Gorillas
@@ -159,12 +178,12 @@
     // in order to put the gorillas on the top.
     var build2 = buildings.position(2);
     var build9 = buildings.position(7);
-    var gorilla1 = new Shark.Assets.DSprite(build2.x+30, build2.y-45, drawGor);
-    var gorilla2 = new Shark.Assets.DSprite(build9.x+30, build9.y-45, drawGor);
+    var gorilla1 = new Shark.Assets.DSprite(build2.x+30, build2.y-45, 20, 20, drawGor);
+    var gorilla2 = new Shark.Assets.DSprite(build9.x+30, build9.y-45, 20, 20, drawGor);
     // Creating banana
-    var banana = new Banana(build2.x+30, build2.y-45, fBanana);
+    var banana = new Banana(build2.x+30, build2.y-45, 20, 20, fBanana);
     // Creating sun
-    var sun = new Shark.Assets.DSprite(400, 20, fSun);
+    var sun = new Shark.Assets.DSprite(400, 20, 20, 20, fSun);
     var angleText = new Shark.Texts.Text('Angle: ', 20, 20);
     var velocityText = new Shark.Texts.Text('Velocity: ', 20, 40);
 
@@ -178,13 +197,21 @@
     Vm.addEntity('sun', sun);
     Vm.addEntity('angleText', angleText);
     Vm.addEntity('velocityText', velocityText);
-    Vm.addPhase('waitingAngle', onWaitingAngle, true);
+    
+    return 'waitingAngle';
+  }
+
+  Vm.onInit(function() {
+    Vm.addPhase('onInit', initGame, true);
+    Vm.addPhase('waitingAngle', onWaitingAngle);
     Vm.addPhase('waitingVel', onWaitingVel);
     Vm.addPhase('throwing', onThrowing);
     Vm.addPhase('changeTurn', onChangeTurn);
+    Vm.addPhase('onWin', onWin);
   });
 
   Vm.onLoop(function () {   
+    Vm.phase();
     var gorilla1 = Vm.entity('gorilla1');
     var gorilla2 = Vm.entity('gorilla2');
     var buildings = Vm.get('buildings');
@@ -193,7 +220,6 @@
     gorilla2.draw();
     buildings.draw();
     sun.draw();
-    Vm.phase();
   });
 
   Vm.start();
