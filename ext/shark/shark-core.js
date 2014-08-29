@@ -110,12 +110,14 @@
     },
   });
 
-  // An Entity is kind of an abstract class
   var Entity = window.Base.extend({
-    constructor : function(x, y) {
+    constructor : function(x, y, width, height) {
       this.position = {};
+      this.size = {};
       this.position.x = x;
       this.position.y = y; 
+      this.size.width = width;
+      this.size.height = height;
       this.update = true;
     },
     x: function(x) {
@@ -125,6 +127,14 @@
     y: function(y) {
       this.position.y = y || this.position.y;
       return this.position.y;
+    },
+    width: function(width) {
+      this.size.width = width || this.position.width;
+      return this.size.width;
+    },
+    height: function(height) {
+      this.size.height = height || this.position.height;
+      return this.size.height;
     },
     show: function() {
     },
@@ -138,7 +148,10 @@
         backCanvas.parent
       ); 
     },
-    
+    hasCollisionedWith: function(entity) {
+      return ((this.x() + this.width() >= entity.x()) && (this.x() <= entity.x() + entity.width())) &&
+        ((this.y() + this.height() >= entity.y()) && (this.y() <= entity.y() + entity.height()));
+    },
     contex: function() {
       return this.canvas.context();	
     },
