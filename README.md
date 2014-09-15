@@ -1,4 +1,4 @@
-Gorillas.js
+[Gorillas.js](http://tehsis.github.io/Gorillas.js/)
 =
 Clone of the game [gorillas.bas](http://en.wikipedia.org/wiki/Gorillas_%28video_game%29) on javascript
 
