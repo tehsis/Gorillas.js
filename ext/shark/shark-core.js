@@ -149,8 +149,18 @@
       ); 
     },
     hasCollisionedWith: function(entity) {
-      return ((this.x() + this.width() >= entity.x()) && (this.x() <= entity.x() + entity.width())) &&
-        ((this.y() + this.height() >= entity.y()) && (this.y() <= entity.y() + entity.height()));
+      // Get the actual dimensions of both entities
+      const thisWidth = this.size.width || 20;  // Default size if not set
+      const thisHeight = this.size.height || 20;
+      const entityWidth = entity.size.width || 20;
+      const entityHeight = entity.size.height || 20;
+
+      return (
+        (this.position.x + thisWidth >= entity.position.x) && 
+        (this.position.x <= entity.position.x + entityWidth) &&
+        (this.position.y + thisHeight >= entity.position.y) && 
+        (this.position.y <= entity.position.y + entityHeight)
+      );
     },
     contex: function() {
       return this.canvas.context();	

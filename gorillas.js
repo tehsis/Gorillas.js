@@ -27,7 +27,27 @@
       }
       var outOfScreen = (this.position.x >= width) || (this.position.y > height);
       return outOfScreen;	 
-    },   
+    },
+    
+    // New collision detection method
+    checkGorillaCollision: function(gorilla) {
+        // Define collision boxes
+        const bananaLeft = this.position.x;
+        const bananaRight = this.position.x + 20;
+        const bananaTop = this.position.y;
+        const bananaBottom = this.position.y + 20;
+        
+        const gorillaLeft = gorilla.position.x;
+        const gorillaRight = gorilla.position.x + 40;
+        const gorillaTop = gorilla.position.y;
+        const gorillaBottom = gorilla.position.y + 40;
+        
+        // Check for overlap
+        return !(bananaLeft > gorillaRight || 
+                bananaRight < gorillaLeft || 
+                bananaTop > gorillaBottom ||
+                bananaBottom < gorillaTop);
+    }
   });
 
   var Buildings = window.Base.extend({
@@ -42,6 +62,7 @@
         var y = (700-bheight);
         var nFBuilding = fBuilding(bwidth, bheight);
         var nBuilding = new Shark.Assets.DSprite(x, y, 20, 20, nFBuilding);
+        nBuilding.drawFunction = nFBuilding;
         this.building.push(nBuilding);
         Vm.addEntity('building' + i, nBuilding);      
       }
@@ -131,31 +152,83 @@
     var gravity = 9.8;
     var turn = Vm.get('turn');
     var gorilla = Vm.entity("gorilla" + turn);
-    var opponent = (gorilla === Vm.entity("gorilla1"))?Vm.entity("gorilla2"):Vm.entity("gorilla1");
+    var opponent = (gorilla === Vm.entity("gorilla1")) ? Vm.entity("gorilla2") : Vm.entity("gorilla1");
+    var buildings = Vm.get('buildings').building;
     var to;
     if (turn === 1) {
-      to = 'left';
-    } else { 
-      to = 'right';
-    } 
+        to = 'left';
+    } else {
+        to = 'right';
+    }
     var next = 'throwing';
     var velocity = parseInt(Vm.get('vel'), 10);
     var angle = parseInt(Vm.get('angle'), 10);
     var banana = Vm.entity('banana');
 
-    if (banana.hasCollisionedWith(opponent)) {
-      Vm.set('winner', gorilla);
-      Vm.set('looser', opponent);
-      next =  "onWin";
+    var outOfScreen = banana.throwing(gorilla, to, velocity, angle, startTime, actualTime, gravity);
+
+    // Only check collisions after banana has moved away from throwing gorilla
+    if (actualTime - startTime > 0.5) {
+        // Simple distance-based collision check with both gorillas
+        const gorillas = [Vm.entity("gorilla1"), Vm.entity("gorilla2")];
+        
+        for (let hitGorilla of gorillas) {
+            const dx = banana.position.x - hitGorilla.position.x;
+            const dy = banana.position.y - hitGorilla.position.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < 30) {
+                // Create explosion effect
+                var explosionRadius = 20;
+                var explosionDuration = 500;
+                var startTime = Date.now();
+                
+                function drawExplosion(context) {
+                    const progress = (Date.now() - startTime) / explosionDuration;
+                    const currentRadius = explosionRadius * (1 - progress);
+                    
+                    if (progress <= 1) {
+                        context.beginPath();
+                        context.arc(0, 0, currentRadius, 0, Math.PI * 2);
+                        context.fillStyle = '#FFA500';
+                        context.fill();
+                    }
+                }
+
+                // Add explosion effect at gorilla's position
+                hitGorilla.addEffect(drawExplosion, explosionDuration);
+                
+                // Hide banana
+                banana.position.x = -100;
+                banana.position.y = -100;
+                banana.update = true;
+                
+                // Set winner as the other gorilla using Vm.entity()
+                Vm.set('winner', hitGorilla === Vm.entity("gorilla1") ? Vm.entity("gorilla2") : Vm.entity("gorilla1"));
+                Vm.set('looser', hitGorilla);
+                next = "onWin";
+                break;
+            }
+        }
     }
 
-    if (banana.throwing(gorilla, to, velocity, angle, startTime, actualTime, gravity)) {
-      next = 'changeTurn';  
-      Vm.del('startTime');
-      Vm.del('vel');
-      Vm.del('angle');
+    var collision = checkBuildingCollision(banana.position.x, banana.position.y, buildings);
+    if (collision.hit) {
+        createExplosion(banana, collision);
+        next = 'changeTurn';
+        Vm.del('startTime');
+        Vm.del('vel');
+        Vm.del('angle');
     }
-    banana.draw(true, Vm.getTicks()*10);
+
+    if (outOfScreen) {
+        next = 'changeTurn';
+        Vm.del('startTime');
+        Vm.del('vel');
+        Vm.del('angle');
+    }
+
+    banana.draw(true, Vm.getTicks() * 10);
     return next;
   }
 
@@ -174,20 +247,26 @@
     // Creating buildings
     var buildings = new Buildings(10);
     // Creating Gorillas
-    // Getting the position of the 2nd and 9th building
-    // in order to put the gorillas on the top.
     var build2 = buildings.position(2);
     var build9 = buildings.position(7);
-    var gorilla1 = new Shark.Assets.DSprite(build2.x+30, build2.y-45, 20, 20, drawGor);
-    var gorilla2 = new Shark.Assets.DSprite(build9.x+30, build9.y-45, 20, 20, drawGor);
-    // Creating banana
+    
+    // Create gorillas with proper collision size
+    var gorilla1 = new Shark.Assets.DSprite(build2.x+30, build2.y-45, 40, 40, drawGor);
+    var gorilla2 = new Shark.Assets.DSprite(build9.x+30, build9.y-45, 40, 40, drawGor);
+    
+    // Create banana with proper collision size
     var banana = new Banana(build2.x+30, build2.y-45, 20, 20, fBanana);
-    // Creating sun
+
+    // Explicitly set collision sizes
+    gorilla1.size = { width: 40, height: 40 };
+    gorilla2.size = { width: 40, height: 40 };
+    banana.size = { width: 20, height: 20 };
+    
+    // Rest of initialization...
     var sun = new Shark.Assets.DSprite(400, 20, 20, 20, fSun);
     var angleText = new Shark.Texts.Text('Angle: ', 20, 20);
     var velocityText = new Shark.Texts.Text('Velocity: ', 20, 40);
 
-    // Adding entities and setting variables.
     Vm.set('turn', 1);
     Vm.listenEvent('keydown');
     Vm.set('buildings', buildings);
@@ -216,11 +295,106 @@
     var gorilla2 = Vm.entity('gorilla2');
     var buildings = Vm.get('buildings');
     var sun = Vm.entity('sun');
+    var banana = Vm.entity('banana');
+    var currentPhase = Vm.actualPhase;  // Get current game phase
+  
     gorilla1.draw();
     gorilla2.draw();
     buildings.draw();
     sun.draw();
+    
+    // Only draw banana during 'throwing' phase
+    if (currentPhase === 'throwing' && banana && banana.position.x > -100) {
+        banana.draw(true, Vm.getTicks() * 10);
+    }
   });
+
+  function checkBuildingCollision(bananaX, bananaY, buildings) {
+      const x = Math.floor(bananaX);
+      const y = Math.floor(bananaY);
+
+      for (let building of buildings) {
+          if (!building || typeof building.x !== 'function' || typeof building.y !== 'function') {
+              continue;
+          }
+
+          const buildingX = building.x();
+          const buildingY = building.y();
+          const buildingWidth = 100;
+          const buildingHeight = 700 - buildingY;
+          
+          const isColliding = 
+              x >= buildingX &&
+              x <= buildingX + buildingWidth &&
+              y >= buildingY &&
+              y <= buildingY + buildingHeight;
+          
+          if (isColliding) {
+              const localX = x - buildingX;
+              const localY = y - buildingY;
+              
+              // Check if the collision point is in a damaged area
+              if (building.drawFunction && building.drawFunction.damages) {
+                  const isDamaged = building.drawFunction.damages.some(damage => {
+                      const dx = localX - damage.x;
+                      const dy = localY - damage.y;
+                      const distance = Math.sqrt(dx * dx + dy * dy);
+                      return distance < 20;  // Same radius as damage area
+                  });
+                  
+                  // If the area is already damaged, don't count it as a collision
+                  if (isDamaged) {
+                      continue;
+                  }
+              }
+              
+              return {
+                  hit: true,
+                  building: building,
+                  x: localX,
+                  y: localY
+              };
+          }
+      }
+
+      return {
+          hit: false
+      };
+  }
+
+  function createExplosion(banana, collision) {
+    console.log('Creating explosion:', collision);
+    
+    if (collision.building.drawFunction) {
+        console.log('Building draw function:', collision.building.drawFunction);
+        collision.building.drawFunction.addDamage(collision.x, collision.y);
+        collision.building.update = true;
+    }
+
+    var explosionRadius = 20;
+    var explosionDuration = 500;
+    var startTime = Date.now();
+    
+    function drawExplosion(context) {
+        const progress = (Date.now() - startTime) / explosionDuration;
+        const currentRadius = explosionRadius * (1 - progress);
+        
+        if (progress <= 1) {
+            context.beginPath();
+            context.arc(0, 0, currentRadius, 0, Math.PI * 2);
+            context.fillStyle = '#FFA500';
+            context.fill();
+        }
+    }
+
+    banana.addEffect(drawExplosion, explosionDuration);
+
+    banana.position.x = -100;
+    banana.position.y = -100;
+    
+    banana.update = true;
+    collision.building.update = true;
+  }
 
   Vm.start();
 })(window);

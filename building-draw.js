@@ -13,6 +13,8 @@
       "#FCFE54"
     ];
     var windows = [];
+    var damages = [];
+
     for(i=0;i<(bwidth)/15;i++) {
       for(j=1;j<bheight;j++) {
         var p = Math.floor(Math.random()*2);
@@ -28,18 +30,59 @@
     var funBuild = function(context) {
       var color = colors[n]; 
       context.fillStyle = color;
-      context.fillRect(0, 0, bwidth, bheight);
-      var i;
+      
+      for(let y = 0; y < bheight; y += 10) {
+        for(let x = 0; x < bwidth; x += 10) {
+          let isDamaged = false;
+          for(let damage of damages) {
+            const dx = x - damage.x;
+            const dy = y - damage.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if(distance < 20) {
+              isDamaged = true;
+              break;
+            }
+          }
+          
+          if (!isDamaged) {
+            context.fillRect(x, y, 10, 10);
+          }
+        }
+      }
+
       for (i=0;i<windows.length;i++) {
         win = windows[i];
         var x = win.PosX;
         var y = win.PosY;
-        context.save();
-        context.fillStyle = win.color;
-        context.fillRect(x, y, 5, 10);
-        context.restore();
+        
+        let isDamaged = false;
+        for(let damage of damages) {
+          const dx = x - damage.x;
+          const dy = y - damage.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if(distance < 20) {
+            isDamaged = true;
+            break;
+          }
+        }
+
+        if (!isDamaged) {
+          context.save();
+          context.fillStyle = win.color;
+          context.fillRect(x, y, 5, 10);
+          context.restore();
+        }
       }
     };
+
+    funBuild.addDamage = function(x, y) {
+      console.log('Adding damage at:', x, y);
+      damages.push({ x: x, y: y });
+      return true;
+    };
+
+    funBuild.damages = damages;
+
     return funBuild;
   }
   
