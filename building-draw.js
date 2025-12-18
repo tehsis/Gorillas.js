@@ -26,7 +26,7 @@
     }
 
     var funBuild = function(context) {
-      var color = colors[n]; 
+      var color = colors[n];
       context.fillStyle = color;
       context.fillRect(0, 0, bwidth, bheight);
       var i;
@@ -38,6 +38,20 @@
         context.fillStyle = win.color;
         context.fillRect(x, y, 5, 10);
         context.restore();
+      }
+
+      // Apply damage (create holes from explosions)
+      // Note: 'this' refers to the DSprite entity when called from draw()
+      if (this && this.breakedPoints && this.breakedPoints.length > 0) {
+        context.globalCompositeOperation = 'destination-out';
+        for (i = 0; i < this.breakedPoints.length; i++) {
+          var damage = this.breakedPoints[i];
+          context.fillStyle = 'rgba(0,0,0,1)';
+          context.beginPath();
+          context.arc(damage.x, damage.y, damage.radius, 0, Math.PI * 2);
+          context.fill();
+        }
+        context.globalCompositeOperation = 'source-over';
       }
     };
     return funBuild;
