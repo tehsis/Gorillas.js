@@ -51,12 +51,12 @@
        },
        draw: function(update, time) {
          this.update = update || this.update;
-         if(this.update) { 
+         if(this.update) {
            this.canvas.clear();
            var context = this.canvas.bufferCtx;
            context.save();
-           context.translate(this.position.x, this.position.y); 
-           this.drawingFunctions[this.frame](context, time);
+           context.translate(this.position.x, this.position.y);
+           this.drawingFunctions[this.frame].call(this, context, time);
            context.restore();
            this.frame = (this.drawingFunctions.length-1 < this.frame)?
            this.frame + 1:0;
